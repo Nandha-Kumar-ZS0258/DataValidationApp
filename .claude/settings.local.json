@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "Read(//d/Truestage/Git/Trustage-git/**)",
+      "Bash(echo 'Parent dir listing failed' find d:/Truestage/Git/Trustage-git -maxdepth 3 -name *.csproj)",
+      "Bash(/dev/null find:*)",
+      "Bash(sort find:*)",
+      "Read(//d/Truestage/Git/**)",
+      "Bash(BASE=\"d:/Truestage/Git/Trustage-git/DataValidationApp\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Checks/Members\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Checks/Accounts\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Checks/Loans\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Checks/Transactions\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Checks/CrossEntity\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Extensions\")",
+      "Bash(mkdir -p \"$BASE/tests/TruStage.Adaptor.Validation.Tests/Helpers\")"
+    ]
+  }
+}

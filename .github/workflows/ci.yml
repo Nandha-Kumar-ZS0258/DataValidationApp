@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  # ── Build & Test ─────────────────────────────────────────────────────────────
+  build:
+    name: Build & Test (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Required for Source Link
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore dependencies
+        run: dotnet restore DataValidationApp.sln
+
+      - name: Build (Release)
+        run: >
+          dotnet build DataValidationApp.sln
+          --configuration Release
+          --no-restore
+
+      - name: Run tests
+        run: >
+          dotnet test DataValidationApp.sln
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=results.trx"
+          --collect:"XPlat Code Coverage"
+          --results-directory ./test-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ./test-results/**/*.trx
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ./test-results/**/coverage.cobertura.xml
+
+  # ── Pack (Release builds on main only) ───────────────────────────────────────
+  pack:
+    name: Pack NuGet
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore DataValidationApp.sln
+
+      - name: Pack
+        run: >
+          dotnet pack src/TruStage.Adaptor.Validation/TruStage.Adaptor.Validation.csproj
+          --configuration Release
+          --no-restore
+          --output ./nupkgs
+          -p:ContinuousIntegrationBuild=true
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkgs
+          path: ./nupkgs/*.nupkg
+
+      # Uncomment and configure secrets to publish to NuGet.org automatically:
+      # - name: Publish to NuGet.org
+      #   run: >
+      #     dotnet nuget push ./nupkgs/*.nupkg
+      #     --api-key ${{ secrets.NUGET_API_KEY }}
+      #     --source https://api.nuget.org/v3/index.json
+      #     --skip-duplicate

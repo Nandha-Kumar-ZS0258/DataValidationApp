@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- XML documentation for all public APIs -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet package metadata -->
+    <PackageId>TruStage.Adaptor.Validation</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>TruStage</Authors>
+    <Company>TruStage</Company>
+    <Product>TruStage.Adaptor.Validation</Product>
+    <Description>Data pipeline validation checks, consistency rules, and gate orchestration for the TruStage Credit Union Adaptor platform.</Description>
+    <PackageTags>TruStage;Adaptor;Validation;DataPipeline;CreditUnion;DataQuality</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Publish symbols for debugging consumers -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Source link & deterministic builds for CI -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+
+    <!-- Code quality -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- Embed the root README into the package -->
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Cross-repo dev: when TruStage_Adaptor_POC is cloned as a sibling repo, prefer a
+      direct ProjectReference so both repos build together in Visual Studio / dotnet build.
+      On CI (or when POC is not present locally), fall back to the published NuGet package.
+    -->
+    <ProjectReference Include="..\..\..\TruStage_Adaptor_POC\src\TruStage.Adaptor.Core\TruStage.Adaptor.Core.csproj"
+                      Condition="Exists('..\..\..\TruStage_Adaptor_POC\src\TruStage.Adaptor.Core\TruStage.Adaptor.Core.csproj')" />
+    <PackageReference Include="TruStage.Adaptor.Core" Version="1.0.0"
+                      Condition="!Exists('..\..\..\TruStage_Adaptor_POC\src\TruStage.Adaptor.Core\TruStage.Adaptor.Core.csproj')" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+
+    <!-- Source link for deterministic NuGet symbol packages -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
