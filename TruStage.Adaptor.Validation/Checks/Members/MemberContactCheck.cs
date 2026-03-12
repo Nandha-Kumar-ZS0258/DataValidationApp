@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using TruStage.Adaptor.Core.DataValidation.Models;
+using TruStage.Adaptor.Validation.Models;
 using TruStage.Adaptor.Core.Models.Canonical;
 
 namespace TruStage.Adaptor.Validation.Checks.Members;

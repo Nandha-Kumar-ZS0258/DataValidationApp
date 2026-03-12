@@ -1,4 +1,4 @@
-using TruStage.Adaptor.Core.DataValidation.Models;
+using TruStage.Adaptor.Validation.Models;
 
 namespace TruStage.Adaptor.Validation.Checks;
 

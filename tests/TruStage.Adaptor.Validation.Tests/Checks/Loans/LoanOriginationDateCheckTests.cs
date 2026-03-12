@@ -1,5 +1,5 @@
 using FluentAssertions;
-using TruStage.Adaptor.Core.DataValidation.Models;
+using TruStage.Adaptor.Validation.Models;
 using TruStage.Adaptor.Validation.Checks.Loans;
 using TruStage.Adaptor.Validation.Tests.Helpers;
 using Xunit;
