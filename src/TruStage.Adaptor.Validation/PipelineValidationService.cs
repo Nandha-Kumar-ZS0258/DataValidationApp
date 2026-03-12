@@ -149,11 +149,19 @@ public sealed class PipelineValidationService : IPipelineValidationService
             .Where(f => f.Severity == CheckSeverity.Warning)
             .Select(f => f.EntityKey).Distinct().Count();
 
-        // Build clean collections (exclude blocked records)
+        // Build clean collections (exclude blocked records).
+        // Cascade: if a member is blocked, also exclude their accounts, loans, transactions,
+        // and joint-owner rows to avoid FK violations (FK_Accounts_Member, FK_Joint_Primary,
+        // FK_Joint_JointMember) on DB insert.
         var cleanMembers      = members     .Where(m => !blockedMemberIds .Contains(m.MemberId))     .ToList();
-        var cleanAccounts     = accounts    .Where(a => !blockedAccountIds.Contains(a.AccountId))    .ToList();
-        var cleanLoans        = loans       .Where(l => !blockedLoanIds   .Contains(l.LoanId))       .ToList();
-        var cleanTransactions = transactions.Where(t => !blockedTxnIds    .Contains(t.TransactionId)).ToList();
+        var cleanAccounts     = accounts    .Where(a => !blockedAccountIds.Contains(a.AccountId)
+                                                     && !blockedMemberIds .Contains(a.MemberId))     .ToList();
+        var cleanLoans        = loans       .Where(l => !blockedLoanIds   .Contains(l.LoanId)
+                                                     && !blockedMemberIds .Contains(l.MemberId))     .ToList();
+        var cleanTransactions = transactions.Where(t => !blockedTxnIds    .Contains(t.TransactionId)
+                                                     && !blockedMemberIds .Contains(t.MemberId))     .ToList();
+        var cleanJointOwners  = jointOwners .Where(j => !blockedMemberIds .Contains(j.PrimaryMemberId)
+                                                     && !blockedMemberIds .Contains(j.JointMemberId)) .ToList();
 
         // ── ReadyForProd snapshot ────────────────────────────────────────────
         var readyForProdSnapshot = new DataSnapshot
@@ -163,7 +171,7 @@ public sealed class PipelineValidationService : IPipelineValidationService
             AccountCount    = cleanAccounts.Count,
             LoanCount       = cleanLoans.Count,
             TransactionCount= cleanTransactions.Count,
-            JointOwnerCount = jointOwners.Count,
+            JointOwnerCount = cleanJointOwners.Count,
             DqBlocked      = blockedMemberIds.Count + blockedAccountIds.Count + blockedLoanIds.Count + blockedTxnIds.Count,
             DqWarnings     = warnedCount
         };
@@ -185,11 +193,11 @@ public sealed class PipelineValidationService : IPipelineValidationService
             ? CanonicalAdapterResult.Success(
                 transformedResult.CreditUnionId, transformedResult.SourceFilePath,
                 cleanMembers, cleanAccounts, cleanLoans, cleanTransactions,
-                jointOwners, transformedResult.Batch, transformedResult.Registry)
+                cleanJointOwners, transformedResult.Batch, transformedResult.Registry)
             : CanonicalAdapterResult.Partial(
                 transformedResult.CreditUnionId, transformedResult.SourceFilePath,
                 cleanMembers, cleanAccounts, cleanLoans, cleanTransactions,
-                jointOwners, transformedResult.Batch, transformedResult.Registry,
+                cleanJointOwners, transformedResult.Batch, transformedResult.Registry,
                 transformedResult.Errors);
 
         return new Gate1And2Result
