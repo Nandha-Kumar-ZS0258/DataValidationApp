@@ -95,7 +95,7 @@ jobs:
 
       - name: Pack
         run: >
-          dotnet pack src/TruStage.Adaptor.Validation/TruStage.Adaptor.Validation.csproj
+          dotnet pack src/Prism.Pipeline.Validation/Prism.Pipeline.Validation.csproj
           --configuration Release
           --no-restore
           --output ./nupkgs

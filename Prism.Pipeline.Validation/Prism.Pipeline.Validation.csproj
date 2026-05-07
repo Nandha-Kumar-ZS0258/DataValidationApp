@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Prism.Pipeline.Validation</RootNamespace>
+    <AssemblyName>Prism.Pipeline.Validation</AssemblyName>
+
+    <!-- NuGet package identity -->
+    <PackageId>Prism.Pipeline.Validation</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Prism</Authors>
+    <Company>Prism</Company>
+    <Description>Data pipeline validation checks, consistency rules, and gate orchestration for the Prism Credit Union Pipeline platform.</Description>
+    <PackageTags>Prism;Pipeline;Validation;DataPipeline;CreditUnion</PackageTags>
+    <Copyright>Copyright © TruStage</Copyright>
+
+    <!-- Produce a .nupkg alongside the DLL on every build -->
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <!-- Drop the .nupkg to the repo-level packages/ folder so the POC can pick it up -->
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\packages</PackageOutputPath>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Prism.Pipeline.Core is consumed as a pre-built NuGet package, not a project reference -->
+    <PackageReference Include="Prism.Pipeline.Core" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+</Project>
